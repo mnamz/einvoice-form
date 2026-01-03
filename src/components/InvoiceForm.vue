@@ -267,14 +267,21 @@ export default {
         b => b.name.toLowerCase() === branchParam.toLowerCase()
       )
       
-      // Set the branch ID if found
+      // Set the branch ID if found and update header
       if (branchById) {
         this.formData.branch = branchById.id
+        this.updateHeaderFromBranch(branchById)
       } else if (branchByName) {
         this.formData.branch = branchByName.id
+        this.updateHeaderFromBranch(branchByName)
       } else {
         // If no match found, set the value as-is (in case it's a valid ID not in config)
         this.formData.branch = branchParam
+        // Try to find branch by ID one more time
+        const branch = this.branches.find(b => b.id === branchParam)
+        if (branch) {
+          this.updateHeaderFromBranch(branch)
+        }
       }
     }
 
