@@ -405,8 +405,6 @@ export default {
       })
     },
     constructPayload() {
-      const selectedBranch = this.branches.find(b => b.id === this.formData.branch)
-      
       // Construct payload based on identity type
       const payload = {
         name: this.formData.name,
@@ -427,9 +425,14 @@ export default {
         payload.brn = this.formData.identificationNumber
       }
 
+      // Construct endpoint: {baseurl}/api/orders/{order_id}/submit-myinvois
+      const baseUrl = import.meta.env.VITE_BASE_URL || ''
+      const orderId = this.formData.orderId
+      const endpoint = baseUrl ? `${baseUrl}/api/orders/${orderId}/submit-myinvois` : ''
+
       return {
         payload,
-        endpoint: selectedBranch?.endpoint || '',
+        endpoint,
         orderId: this.formData.orderId
       }
     },
@@ -442,28 +445,28 @@ export default {
         const { payload, endpoint, orderId } = this.constructPayload()
 
         if (!endpoint) {
-          throw new Error('Please select a branch')
+          throw new Error('BASE_URL is not configured or order ID is missing')
         }
 
-        // Log the payload (replace with actual API call)
-        console.log('Submitting to:', endpoint)
-        console.log('Order ID:', orderId)
-        console.log('Payload:', payload)
+        if (!orderId) {
+          throw new Error('Order ID is required')
+        }
 
-        // TODO: Replace with actual API call
-        // const response = await fetch(endpoint, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(payload)
-        // })
+        // Submit to API endpoint
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        })
         
-        // if (!response.ok) {
-        //   throw new Error('Failed to submit invoice')
-        // }
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || 'Failed to submit invoice')
+        }
 
-        // const result = await response.json()
+        const result = await response.json()
         
         this.message = 'Company details submitted successfully!'
         this.messageType = 'success'
