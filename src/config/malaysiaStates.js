@@ -1,0 +1,19 @@
+export const malaysiaStates = [
+  { code: 'JHR', name: 'Johor' },
+  { code: 'KDH', name: 'Kedah' },
+  { code: 'KTN', name: 'Kelantan' },
+  { code: 'MLK', name: 'Melaka' },
+  { code: 'NSN', name: 'Negeri Sembilan' },
+  { code: 'PHG', name: 'Pahang' },
+  { code: 'PRK', name: 'Perak' },
+  { code: 'PLS', name: 'Perlis' },
+  { code: 'PNG', name: 'Pulau Pinang' },
+  { code: 'SBH', name: 'Sabah' },
+  { code: 'SWK', name: 'Sarawak' },
+  { code: 'SGR', name: 'Selangor' },
+  { code: 'TRG', name: 'Terengganu' },
+  { code: 'KUL', name: 'Kuala Lumpur' },
+  { code: 'LBN', name: 'Labuan' },
+  { code: 'PJY', name: 'Putrajaya' }
+]
+
