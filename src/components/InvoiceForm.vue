@@ -211,6 +211,7 @@
 <script>
 import { branches } from '../config/branches'
 import { malaysiaStates } from '../config/malaysiaStates'
+import { companyDetails } from '../config/company'
 import IMask from 'imask'
 
 export default {
