@@ -305,12 +305,22 @@ export default {
       this.tinValidated = false
 
       try {
-        // Use proxy path to avoid CORS (works in both dev and production if backend proxy is set up)
+        // Use proxy in development, direct URL in production
+        const isDev = import.meta.env.DEV
         const idType = this.formData.identityType // Use 'NRIC' or 'BRN'
+        let url
         
-        // Use relative proxy path - this requires a backend proxy in production
-        // The proxy should forward /api/myinvois/* to your actual API server
-        const url = `/api/myinvois/taxpayers/search/tin?taxpayerTIN=&idType=${idType}&idValue=${encodeURIComponent(this.formData.identificationNumber)}`
+        if (isDev) {
+          // In development, use Vite proxy to avoid CORS
+          url = `/api/myinvois/taxpayers/search/tin?taxpayerTIN=&idType=${idType}&idValue=${encodeURIComponent(this.formData.identificationNumber)}`
+        } else {
+          // In production, use direct URL (requires backend proxy)
+          const myinvoisUrl = import.meta.env.VITE_MYINVOIS_URL || ''
+          if (!myinvoisUrl) {
+            throw new Error('MYINVOIS_URL is not configured')
+          }
+          url = `${myinvoisUrl}/taxpayers/search/tin?taxpayerTIN=&idType=${idType}&idValue=${encodeURIComponent(this.formData.identificationNumber)}`
+        }
         
         const response = await fetch(url)
 
