@@ -211,7 +211,6 @@
 <script>
 import { branches } from '../config/branches'
 import { malaysiaStates } from '../config/malaysiaStates'
-import { companyDetails } from '../config/company'
 import IMask from 'imask'
 
 export default {
@@ -220,8 +219,8 @@ export default {
     return {
       branches,
       malaysiaStates,
-      companyName: companyDetails.name,
-      companyAddress: companyDetails.address,
+      companyName: '',
+      companyAddress: '',
       isSubmitting: false,
       message: '',
       messageType: '',
@@ -296,6 +295,12 @@ export default {
     }
   },
   methods: {
+    updateHeaderFromBranch(branch) {
+      if (branch) {
+        this.companyName = branch.name
+        this.companyAddress = branch.address || ''
+      }
+    },
     async validateTIN() {
       if (!this.canValidateTIN) {
         return
