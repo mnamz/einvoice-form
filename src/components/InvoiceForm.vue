@@ -219,7 +219,7 @@ export default {
     return {
       branches,
       malaysiaStates,
-      companyName: '',
+      companyName: companyDetails.name,
       companyAddress: '',
       isSubmitting: false,
       message: '',
@@ -304,7 +304,7 @@ export default {
   methods: {
     updateHeaderFromBranch(branch) {
       if (branch) {
-        this.companyName = branch.name
+        // this.companyName = branch.name
         this.companyAddress = branch.address || ''
       }
     },
