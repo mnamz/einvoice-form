@@ -425,10 +425,23 @@ export default {
         payload.brn = this.formData.identificationNumber
       }
 
+      // Get selected branch and extract base URL from branch endpoint
+      const selectedBranch = this.branches.find(b => b.id === this.formData.branch)
+      if (!selectedBranch || !selectedBranch.endpoint) {
+        return {
+          payload,
+          endpoint: '',
+          orderId: this.formData.orderId
+        }
+      }
+
+      // Extract base URL from branch endpoint (e.g., 'https://api.example.com' from 'https://api.example.com/branch1/invoice')
+      const branchEndpointUrl = new URL(selectedBranch.endpoint)
+      const baseUrl = `${branchEndpointUrl.protocol}//${branchEndpointUrl.host}`
+      
       // Construct endpoint: {baseurl}/api/orders/{order_id}/submit-myinvois
-      const baseUrl = import.meta.env.VITE_BASE_URL || ''
       const orderId = this.formData.orderId
-      const endpoint = baseUrl ? `${baseUrl}/api/orders/${orderId}/submit-myinvois` : ''
+      const endpoint = `${baseUrl}/api/orders/${orderId}/submit-myinvois`
 
       return {
         payload,
@@ -445,7 +458,7 @@ export default {
         const { payload, endpoint, orderId } = this.constructPayload()
 
         if (!endpoint) {
-          throw new Error('BASE_URL is not configured or order ID is missing')
+          throw new Error('Branch endpoint is not configured or order ID is missing')
         }
 
         if (!orderId) {
