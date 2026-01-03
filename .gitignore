@@ -29,8 +29,8 @@ dist-ssr/
 .env.production
 
 # Config files (may contain sensitive information)
-src/config/company.js
-src/config/branches.js
+# Note: company.js and branches.js are required for build, so they are committed with default values
+# Edit them with your actual values as needed
 
 # Logs
 logs/
