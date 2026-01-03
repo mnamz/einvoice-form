@@ -73,8 +73,21 @@
               v-model="formData.tin"
               type="text"
               required
+              :readonly="tinValidated"
               placeholder="TIN Number"
             />
+            <p v-if="tinValidated" class="help-text">TIN validated</p>
+          </div>
+
+          <div class="form-group" v-if="formData.identityType === 'NRIC' || formData.identityType === 'BRN'">
+            <button
+              type="button"
+              class="validate-btn"
+              :disabled="!canValidateTIN || isValidatingTIN"
+              @click="validateTIN"
+            >
+              {{ isValidatingTIN ? 'Validating...' : 'Validate TIN' }}
+            </button>
           </div>
         </section>
 
@@ -213,6 +226,8 @@ export default {
       message: '',
       messageType: '',
       phoneMask: null,
+      tinValidated: false,
+      isValidatingTIN: false,
       formData: {
         orderId: '',
         branch: '',
@@ -273,7 +288,72 @@ export default {
       this.phoneMask.destroy()
     }
   },
+  computed: {
+    canValidateTIN() {
+      return (this.formData.identityType === 'NRIC' || this.formData.identityType === 'BRN') && 
+             this.formData.identificationNumber && 
+             this.formData.identificationNumber.trim() !== ''
+    }
+  },
   methods: {
+    async validateTIN() {
+      if (!this.canValidateTIN) {
+        return
+      }
+
+      this.isValidatingTIN = true
+      this.tinValidated = false
+
+      try {
+        // Use proxy in development, direct URL in production
+        const isDev = import.meta.env.DEV
+        const idType = this.formData.identityType // Use 'NRIC' or 'BRN'
+        let url
+        
+        if (isDev) {
+          // In development, use Vite proxy to avoid CORS
+          url = `/api/myinvois/taxpayers/search/tin?taxpayerTIN=&idType=${idType}&idValue=${encodeURIComponent(this.formData.identificationNumber)}`
+        } else {
+          // In production, use direct URL (requires backend proxy)
+          const myinvoisUrl = import.meta.env.VITE_MYINVOIS_URL || ''
+          if (!myinvoisUrl) {
+            throw new Error('MYINVOIS_URL is not configured')
+          }
+          url = `${myinvoisUrl}/taxpayers/search/tin?taxpayerTIN=&idType=${idType}&idValue=${encodeURIComponent(this.formData.identificationNumber)}`
+        }
+        
+        const response = await fetch(url)
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.tin) {
+            this.formData.tin = data.tin
+            this.tinValidated = true
+            this.message = 'TIN validated successfully'
+            this.messageType = 'success'
+          } else {
+            throw new Error('TIN not found in response')
+          }
+        } else if (response.status === 404) {
+          // Fallback to default TIN
+          this.formData.tin = 'EI00000000010'
+          this.tinValidated = false
+          this.message = 'TIN not found, using default TIN'
+          this.messageType = 'error'
+        } else {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || 'Failed to validate TIN')
+        }
+      } catch (error) {
+        // On error, fallback to default TIN
+        this.formData.tin = 'EI00000000010'
+        this.tinValidated = false
+        this.message = error.message || 'Failed to validate TIN, using default TIN'
+        this.messageType = 'error'
+      } finally {
+        this.isValidatingTIN = false
+      }
+    },
     initPhoneMask() {
       // Initialize IMask for Malaysia phone format: +60 followed by 9-11 digits
       // Supports: +60 12 345 6789 (9 digits), +60 12 3456 7890 (10 digits), +60 12 3456 78901 (11 digits)
@@ -551,6 +631,37 @@ select:disabled {
   color: #6b7280;
   opacity: 1;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+.help-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #059669;
+  font-weight: 500;
+}
+
+.validate-btn {
+  background: #2563eb;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.validate-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.validate-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .form-actions {
