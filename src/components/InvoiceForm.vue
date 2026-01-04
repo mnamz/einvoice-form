@@ -514,12 +514,14 @@ export default {
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
-          timer: 3000,
+          timer: 2000,
           timerProgressBar: true
         })
 
-        // Reset form after successful submission (optional)
-        // this.resetForm()
+        // Redirect to success page after a short delay
+        setTimeout(() => {
+          this.$router.push('/success')
+        }, 2000)
 
       } catch (error) {
         Swal.fire({

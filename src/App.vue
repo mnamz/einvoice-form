@@ -1,15 +1,10 @@
 <template>
-  <InvoiceForm />
+  <router-view />
 </template>
 
 <script>
-import InvoiceForm from './components/InvoiceForm.vue'
-
 export default {
-  name: 'App',
-  components: {
-    InvoiceForm
-  }
+  name: 'App'
 }
 </script>
 
