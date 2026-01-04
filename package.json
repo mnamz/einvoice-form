@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "imask": "^6.4.3",
+    "sweetalert2": "^11.26.17",
     "vue": "^3.3.4"
   },
   "devDependencies": {
@@ -16,4 +17,3 @@
     "vite": "^4.5.0"
   }
 }
-

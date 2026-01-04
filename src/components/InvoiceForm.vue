@@ -200,10 +200,6 @@
         </div>
       </form>
 
-      <!-- Success/Error Messages -->
-      <div v-if="message" :class="['message', messageType]">
-        {{ message }}
-      </div>
     </div>
   </div>
 </template>
@@ -213,6 +209,7 @@ import { branches } from '../config/branches'
 import { malaysiaStates } from '../config/malaysiaStates'
 import { companyDetails } from '../config/company'
 import IMask from 'imask'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'InvoiceForm',
@@ -223,8 +220,6 @@ export default {
       companyName: companyDetails.name,
       companyAddress: '',
       isSubmitting: false,
-      message: '',
-      messageType: '',
       phoneMask: null,
       tinValidated: false,
       isValidatingTIN: false,
@@ -342,8 +337,15 @@ export default {
           if (data.tin) {
             this.formData.tin = data.tin
             this.tinValidated = true
-            this.message = 'TIN validated successfully'
-            this.messageType = 'success'
+            Swal.fire({
+              icon: 'success',
+              title: 'TIN validated successfully',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true
+            })
           } else {
             throw new Error('TIN not found in response')
           }
@@ -351,8 +353,15 @@ export default {
           // Fallback to default TIN
           this.formData.tin = 'EI00000000010'
           this.tinValidated = false
-          this.message = 'TIN not found, using default TIN'
-          this.messageType = 'error'
+          Swal.fire({
+            icon: 'warning',
+            title: 'TIN not found, using default TIN',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          })
         } else {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.message || 'Failed to validate TIN')
@@ -361,8 +370,15 @@ export default {
         // On error, fallback to default TIN
         this.formData.tin = 'EI00000000010'
         this.tinValidated = false
-        this.message = error.message || 'Failed to validate TIN, using default TIN'
-        this.messageType = 'error'
+        Swal.fire({
+          icon: 'error',
+          title: error.message || 'Failed to validate TIN, using default TIN',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        })
       } finally {
         this.isValidatingTIN = false
       }
@@ -464,8 +480,6 @@ export default {
     },
     async handleSubmit() {
       this.isSubmitting = true
-      this.message = ''
-      this.messageType = ''
 
       try {
         const { payload, endpoint, orderId } = this.constructPayload()
@@ -494,15 +508,29 @@ export default {
 
         const result = await response.json()
         
-        this.message = 'Company details submitted successfully!'
-        this.messageType = 'success'
+        await Swal.fire({
+          icon: 'success',
+          title: 'Company details submitted successfully!',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        })
 
         // Reset form after successful submission (optional)
         // this.resetForm()
 
       } catch (error) {
-        this.message = error.message || 'An error occurred while submitting the company details'
-        this.messageType = 'error'
+        Swal.fire({
+          icon: 'error',
+          title: error.message || 'An error occurred while submitting the company details',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        })
       } finally {
         this.isSubmitting = false
       }
@@ -728,28 +756,6 @@ select:disabled {
   background: #94a3b8;
   cursor: not-allowed;
   box-shadow: none;
-}
-
-.message {
-  margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  border-radius: 4px;
-  text-align: left;
-  font-weight: 400;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-}
-
-.message.success {
-  background-color: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.message.error {
-  background-color: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
 }
 
 @media (max-width: 768px) {
